@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071d17">
+  <title>扑克牌记牌器</title>
+  <style>
+    :root{--felt:#071d17;--felt2:#0c2b22;--gold:#d7b45e;--cream:#f8f2e5;--red:#c83d47;--ink:#17201c}
+    *{box-sizing:border-box}html{background:var(--felt)}body{margin:0;background:var(--felt);color:var(--cream);font-family:Arial,"Microsoft YaHei",sans-serif}button{font:inherit}
+    .app{min-height:100vh;padding:34px clamp(14px,4vw,64px) 28px;background:linear-gradient(115deg,rgba(255,255,255,.018) 25%,transparent 25%) 0 0/9px 9px,radial-gradient(circle at 50% -10%,#124838 0,var(--felt2) 35%,var(--felt) 72%)}
+    .hero,.progress,.board,.controls,.save-note{width:min(1180px,100%);margin-inline:auto}
+    .hero{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-bottom:25px;border-bottom:1px solid rgba(215,180,94,.24)}
+    .eyebrow{display:flex;align-items:center;gap:9px;margin:0 0 8px;color:#a4b9af;font-size:11px;letter-spacing:.24em;font-weight:700}.dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px rgba(215,180,94,.75)}
+    h1{margin:0;font-size:clamp(30px,4vw,48px);line-height:1.05;letter-spacing:-.04em}.subtitle{margin:10px 0 0;color:#94aaa0;font-size:14px}
+    .score{min-width:126px;padding:14px 20px;text-align:right;border:1px solid rgba(215,180,94,.25);border-radius:14px;background:rgba(0,0,0,.14)}.score-line{display:flex;justify-content:flex-end;align-items:baseline;gap:5px}.score strong{color:var(--gold);font-size:31px;line-height:1}.score span{color:#80978c;font-size:14px}.score p{margin:5px 0 0;color:#9aafa5;font-size:12px;letter-spacing:.12em}
+    .progress{margin-top:19px}.progress-copy{display:flex;justify-content:space-between;color:#8fa69b;font-size:11px}.progress-copy strong{color:var(--gold)}.track{height:4px;margin-top:8px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.075)}.bar{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#a77c2f,#e3c877);transition:width .3s ease}
+    .board{display:grid;gap:12px;margin-top:22px}.suit-row{display:grid;grid-template-columns:88px minmax(0,1fr);gap:16px;align-items:center;padding:13px 15px;border:1px solid rgba(255,255,255,.065);border-radius:16px;background:rgba(3,17,13,.37);box-shadow:0 12px 35px rgba(0,0,0,.08)}
+    .suit-title{display:flex;align-items:center;gap:10px}.suit-title h2{margin:0;font-size:14px}.suit-title p{margin:3px 0 0;color:#789087;font-size:10px}.badge{display:grid;width:35px;height:35px;place-items:center;border-radius:10px;color:#c9d3ce;background:rgba(255,255,255,.055);font-size:20px}.red-title .badge{color:#ec7d82;background:rgba(200,61,71,.11)}.joker-title .badge{color:var(--gold);background:rgba(215,180,94,.1)}
+    .cards{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:clamp(5px,.7vw,10px)}.joker-cards{display:grid;grid-template-columns:repeat(2,minmax(52px,68px));gap:10px}
+    .card{position:relative;display:flex;aspect-ratio:.69;min-width:0;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:clamp(5px,.7vw,9px);overflow:hidden;cursor:pointer;color:rgba(237,240,236,.23);border:1px solid rgba(255,255,255,.09);border-radius:clamp(7px,.8vw,10px);background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(0,0,0,.12));transition:.16s ease;-webkit-tap-highlight-color:transparent}.card:hover{transform:translateY(-2px);border-color:rgba(215,180,94,.32)}.card:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+    .card.on{color:var(--ink);border-color:rgba(255,255,255,.72);background:linear-gradient(145deg,#fffdf6,#e8dec9);box-shadow:0 7px 16px rgba(0,0,0,.24),inset 0 1px #fff;transform:translateY(-2px)}.card.red.on{color:var(--red)}.card.joker.on{color:#99711e}.rank{font-size:clamp(12px,1.25vw,18px);line-height:1;font-weight:800}.symbol{align-self:center;margin-block:auto;font-size:clamp(16px,2vw,27px);line-height:1}.check{position:absolute;right:4px;bottom:4px;display:grid;width:15px;height:15px;place-items:center;opacity:0;color:#fff;border-radius:50%;background:#34765c;font-size:9px}.card.on .check{opacity:1}.joker-cards .card{min-height:73px;aspect-ratio:.78}.joker-cards .rank{font-size:11px}
+    .controls{display:flex;justify-content:center;gap:10px;margin-top:23px}.control{min-width:128px;padding:11px 18px;cursor:pointer;border-radius:10px;font-weight:700;font-size:13px;transition:.15s ease}.control:hover:not(:disabled){transform:translateY(-1px)}.all{color:#10231b;border:1px solid #dfc16f;background:linear-gradient(#e6cc82,#bd9849)}.clear{color:#d4dfda;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.045)}.control:disabled{cursor:not-allowed;opacity:.35}.save-note{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:12px;color:#688177;font-size:10px}.save-note .dot{width:4px;height:4px;background:#54b889;box-shadow:0 0 8px #54b889}
+    @media(max-width:760px){.app{padding:22px 10px 20px}.hero{align-items:flex-end;padding-inline:4px}.subtitle{font-size:12px}.score{min-width:94px;padding:10px 12px}.score strong{font-size:25px}.suit-row{grid-template-columns:1fr;gap:10px;padding:11px}.suit-title{justify-content:space-between}.suit-title>div{display:flex;align-items:baseline;gap:7px}.suit-title .badge{order:2;width:30px;height:30px;font-size:17px}.cards{grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.card{min-height:59px}.joker-cards{grid-template-columns:repeat(2,57px)}}
+    @media(max-width:420px){.eyebrow{font-size:9px}h1{font-size:27px}.score p{display:none}.controls{position:sticky;bottom:8px;z-index:5;padding:8px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(5,25,19,.86);backdrop-filter:blur(14px)}.control{flex:1;min-width:0;padding-inline:10px}}
+    @media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+<main class="app">
+  <header class="hero"><div><p class="eyebrow"><span class="dot"></span>CARD COLLECTOR</p><h1>扑克牌记牌器</h1><p class="subtitle">点击牌面点亮，再次点击即可取消</p></div><div class="score" aria-live="polite"><div class="score-line"><strong id="total">0</strong><span>/ 54</span></div><p>已收集</p></div></header>
+  <section class="progress" aria-label="收集进度"><div class="progress-copy"><span>收集进度</span><strong id="percent">0%</strong></div><div class="track"><span class="bar" id="bar"></span></div></section>
+  <div class="board">
+    <section class="suit-row" data-group="spade"><div class="suit-title"><span class="badge">♠</span><div><h2>黑桃</h2><p><span class="group-count">0</span> / 13</p></div></div><div class="cards">
+      <button class="card" data-card-id="spade-A" data-label="黑桃A"><span class="rank">A</span><span class="symbol">♠</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="spade-2" data-label="黑桃2"><span class="rank">2</span><span class="symbol">♠</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="spade-3" data-label="黑桃3"><span class="rank">3</span><span class="symbol">♠</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="spade-4" data-label="黑桃4"><span class="rank">4</span><span class="symbol">♠</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="spade-5" data-label="黑桃5"><span class="rank">5</span><span class="symbol">♠</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="spade-6" data-label="黑桃6"><span class="rank">6</span><span class="symbol">♠</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="spade-7" data-label="黑桃7"><span class="rank">7</span><span class="symbol">♠</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="spade-8" data-label="黑桃8"><span class="rank">8</span><span class="symbol">♠</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="spade-9" data-label="黑桃9"><span class="rank">9</span><span class="symbol">♠</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="spade-10" data-label="黑桃10"><span class="rank">10</span><span class="symbol">♠</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="spade-J" data-label="黑桃J"><span class="rank">J</span><span class="symbol">♠</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="spade-Q" data-label="黑桃Q"><span class="rank">Q</span><span class="symbol">♠</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="spade-K" data-label="黑桃K"><span class="rank">K</span><span class="symbol">♠</span><span class="check">✓</span></button>
+    </div></section>
+    <section class="suit-row" data-group="heart"><div class="suit-title red-title"><span class="badge">♥</span><div><h2>红桃</h2><p><span class="group-count">0</span> / 13</p></div></div><div class="cards">
+      <button class="card red" data-card-id="heart-A" data-label="红桃A"><span class="rank">A</span><span class="symbol">♥</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="heart-2" data-label="红桃2"><span class="rank">2</span><span class="symbol">♥</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="heart-3" data-label="红桃3"><span class="rank">3</span><span class="symbol">♥</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="heart-4" data-label="红桃4"><span class="rank">4</span><span class="symbol">♥</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="heart-5" data-label="红桃5"><span class="rank">5</span><span class="symbol">♥</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="heart-6" data-label="红桃6"><span class="rank">6</span><span class="symbol">♥</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="heart-7" data-label="红桃7"><span class="rank">7</span><span class="symbol">♥</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="heart-8" data-label="红桃8"><span class="rank">8</span><span class="symbol">♥</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="heart-9" data-label="红桃9"><span class="rank">9</span><span class="symbol">♥</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="heart-10" data-label="红桃10"><span class="rank">10</span><span class="symbol">♥</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="heart-J" data-label="红桃J"><span class="rank">J</span><span class="symbol">♥</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="heart-Q" data-label="红桃Q"><span class="rank">Q</span><span class="symbol">♥</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="heart-K" data-label="红桃K"><span class="rank">K</span><span class="symbol">♥</span><span class="check">✓</span></button>
+    </div></section>
+    <section class="suit-row" data-group="club"><div class="suit-title"><span class="badge">♣</span><div><h2>梅花</h2><p><span class="group-count">0</span> / 13</p></div></div><div class="cards">
+      <button class="card" data-card-id="club-A" data-label="梅花A"><span class="rank">A</span><span class="symbol">♣</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="club-2" data-label="梅花2"><span class="rank">2</span><span class="symbol">♣</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="club-3" data-label="梅花3"><span class="rank">3</span><span class="symbol">♣</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="club-4" data-label="梅花4"><span class="rank">4</span><span class="symbol">♣</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="club-5" data-label="梅花5"><span class="rank">5</span><span class="symbol">♣</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="club-6" data-label="梅花6"><span class="rank">6</span><span class="symbol">♣</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="club-7" data-label="梅花7"><span class="rank">7</span><span class="symbol">♣</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="club-8" data-label="梅花8"><span class="rank">8</span><span class="symbol">♣</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="club-9" data-label="梅花9"><span class="rank">9</span><span class="symbol">♣</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="club-10" data-label="梅花10"><span class="rank">10</span><span class="symbol">♣</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="club-J" data-label="梅花J"><span class="rank">J</span><span class="symbol">♣</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="club-Q" data-label="梅花Q"><span class="rank">Q</span><span class="symbol">♣</span><span class="check">✓</span></button>
+      <button class="card" data-card-id="club-K" data-label="梅花K"><span class="rank">K</span><span class="symbol">♣</span><span class="check">✓</span></button>
+    </div></section>
+    <section class="suit-row" data-group="diamond"><div class="suit-title red-title"><span class="badge">♦</span><div><h2>方块</h2><p><span class="group-count">0</span> / 13</p></div></div><div class="cards">
+      <button class="card red" data-card-id="diamond-A" data-label="方块A"><span class="rank">A</span><span class="symbol">♦</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="diamond-2" data-label="方块2"><span class="rank">2</span><span class="symbol">♦</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="diamond-3" data-label="方块3"><span class="rank">3</span><span class="symbol">♦</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="diamond-4" data-label="方块4"><span class="rank">4</span><span class="symbol">♦</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="diamond-5" data-label="方块5"><span class="rank">5</span><span class="symbol">♦</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="diamond-6" data-label="方块6"><span class="rank">6</span><span class="symbol">♦</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="diamond-7" data-label="方块7"><span class="rank">7</span><span class="symbol">♦</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="diamond-8" data-label="方块8"><span class="rank">8</span><span class="symbol">♦</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="diamond-9" data-label="方块9"><span class="rank">9</span><span class="symbol">♦</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="diamond-10" data-label="方块10"><span class="rank">10</span><span class="symbol">♦</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="diamond-J" data-label="方块J"><span class="rank">J</span><span class="symbol">♦</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="diamond-Q" data-label="方块Q"><span class="rank">Q</span><span class="symbol">♦</span><span class="check">✓</span></button>
+      <button class="card red" data-card-id="diamond-K" data-label="方块K"><span class="rank">K</span><span class="symbol">♦</span><span class="check">✓</span></button>
+    </div></section>
+    <section class="suit-row" data-group="joker"><div class="suit-title joker-title"><span class="badge">★</span><div><h2>王牌</h2><p><span class="group-count">0</span> / 2</p></div></div><div class="joker-cards">
+      <button class="card joker" data-card-id="joker-small" data-label="小王"><span class="rank">小王</span><span class="symbol">★</span><span class="check">✓</span></button>
+      <button class="card joker" data-card-id="joker-big" data-label="大王"><span class="rank">大王</span><span class="symbol">★</span><span class="check">✓</span></button>
+    </div></section>
+  </div>
+  <footer class="controls"><button class="control all" id="all" type="button">✦ 全部点亮</button><button class="control clear" id="clear" type="button">↺ 清空记录</button></footer>
+  <p class="save-note"><span class="dot"></span>记录会自动保存在此浏览器</p>
+</main>
+<script>
+  (()=>{
+    const key="poker-card-tracker-collected";
+    const cards=[...document.querySelectorAll("[data-card-id]")];
+    let selected=new Set();
+    try{const saved=JSON.parse(localStorage.getItem(key)||"[]");if(Array.isArray(saved))selected=new Set(saved.filter(id=>cards.some(c=>c.dataset.cardId===id)))}catch{localStorage.removeItem(key)}
+    function render(){
+      cards.forEach(card=>{const on=selected.has(card.dataset.cardId);card.classList.toggle("on",on);card.setAttribute("aria-pressed",String(on));card.setAttribute("aria-label",`${card.dataset.label}，${on?"已点亮，点击取消":"未点亮，点击收集"}`)});
+      document.querySelectorAll("[data-group]").forEach(group=>{group.querySelector(".group-count").textContent=[...group.querySelectorAll("[data-card-id]")].filter(card=>selected.has(card.dataset.cardId)).length});
+      const count=selected.size,pct=Math.round(count/54*100);document.getElementById("total").textContent=count;document.getElementById("percent").textContent=pct+"%";document.getElementById("bar").style.width=pct+"%";document.getElementById("clear").disabled=count===0;
+    }
+    function save(){localStorage.setItem(key,JSON.stringify([...selected]));render()}
+    cards.forEach(card=>card.addEventListener("click",()=>{const id=card.dataset.cardId;selected.has(id)?selected.delete(id):selected.add(id);save()}));
+    document.getElementById("all").addEventListener("click",()=>{selected=new Set(cards.map(card=>card.dataset.cardId));save()});
+    document.getElementById("clear").addEventListener("click",()=>{selected.clear();save()});
+    render();
+  })();
+</script>
+</body>
+</html>
